@@ -1,0 +1,58 @@
+INTERVIA — User Stories
+US-01 — User Registration
+As a new user,
+I want to create an account using my name, email and password,
+so that I can access the interview platform.
+US-02 — User Login
+As a registered user,
+I want to log into the system,
+so that I can access my interview dashboard.
+US-03 — Candidate Profile
+As a candidate,
+I want to select my primary technical skill,
+so that the system can generate relevant interview questions.
+US-04 — Resume Upload
+As a candidate,
+I want to upload my resume in PDF or DOCX format,
+so that the system can analyze my skills, projects and experience.
+US-05 — Resume-Based Interview
+As a candidate,
+I want interview questions to be generated based on my resume,
+so that the interview becomes personalized.
+US-06 — Start Interview
+As a candidate,
+I want to start an AI-powered technical interview,
+so that I can practice in a realistic interview environment.
+US-07 — Adaptive Questions
+As a candidate,
+I want the difficulty of questions to adapt according to my performance,
+so that the interview evaluates my actual technical ability.
+US-08 — Voice Interview
+As a candidate,
+I want to answer questions using my voice,
+so that I can simulate a real interview conversation.
+US-09 — AI Evaluation
+As a candidate,
+I want the AI to evaluate my answers,
+so that I can understand how well I performed.
+US-10 — Camera Monitoring
+As a candidate,
+I want to enable my camera during the interview,
+so that the interview experience resembles a real online assessment.
+US-11 — Timed Interview
+As a candidate,
+I want each question to have a time limit and the interview to have an overall time limit,
+so that I can practice answering under interview pressure.
+US-12 — Results
+As a candidate,
+I want to see my scores after completing the interview,
+so that I can measure my performance.
+US-13 — Performance Analysis
+As a candidate,
+I want to see my overall performance percentage,
+so that I can identify whether my performance is excellent, good or needs improvement.
+US-14 — Interview History
+As a candidate,
+I want to see my previous interview activity,
+so that I can track my progress.
+
