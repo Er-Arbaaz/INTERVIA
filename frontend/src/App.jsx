@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import Navbar from "./Navbar";
 import "./App.css";
 
 const API = "http://127.0.0.1:8000";
@@ -11,17 +10,14 @@ const API = "http://127.0.0.1:8000";
 
 function AuthView({ onLoginSuccess }) {
   const [mode, setMode] = useState("login");
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setMessage("");
 
     if (!email.trim() || !password.trim()) {
@@ -37,20 +33,17 @@ function AuthView({ onLoginSuccess }) {
     try {
       setLoading(true);
 
-      let response;
-
-      if (mode === "signup") {
-        response = await axios.post(`${API}/auth/signup`, {
-          name: name.trim(),
-          email: email.trim(),
-          password,
-        });
-      } else {
-        response = await axios.post(`${API}/auth/login`, {
-          email: email.trim(),
-          password,
-        });
-      }
+      const response =
+        mode === "signup"
+          ? await axios.post(`${API}/auth/signup`, {
+              name: name.trim(),
+              email: email.trim(),
+              password,
+            })
+          : await axios.post(`${API}/auth/login`, {
+              email: email.trim(),
+              password,
+            });
 
       const user = {
         id: response.data?.id,
@@ -59,18 +52,14 @@ function AuthView({ onLoginSuccess }) {
       };
 
       localStorage.setItem("authUser", JSON.stringify(user));
-
       onLoginSuccess(user);
     } catch (error) {
       console.error("Authentication error:", error);
-
       const detail = error.response?.data?.detail;
 
       if (Array.isArray(detail)) {
         setMessage(
-          detail
-            .map((item) => item?.msg || "Validation error")
-            .join(", ")
+          detail.map((item) => item?.msg || "Validation error").join(", ")
         );
       } else if (typeof detail === "string") {
         setMessage(detail);
@@ -87,129 +76,90 @@ function AuthView({ onLoginSuccess }) {
   };
 
   return (
-    <main className="main-content">
-      <section className="hero-section">
-        <div className="hero-badge">
-          <span className="pulse-dot"></span>
-          AI-POWERED INTERVIEW PLATFORM
+    <main className="auth-page">
+      <div className="auth-brand">
+        <div className="brand-mark">AI</div>
+        <div>
+          <strong>INTERVIA</strong>
+          <span>Intelligent Assessment Platform</span>
         </div>
+      </div>
 
-        <h1 className="hero-title">
+      <section className="auth-intro">
+        <div className="auth-kicker">AI-POWERED INTERVIEW PLATFORM</div>
+        <h1>
           Welcome to Your
-          <span>{" "}AI Interview.</span>
+          <span> INTERVIA.</span>
         </h1>
-
-        <p className="hero-description">
-          Sign in to your interview workspace or create
-          a new account to begin your technical
-          assessment journey.
+        <p>
+          {mode === "login"
+            ? "Sign in to continue to your intelligent interview workspace."
+            : "Create your account to begin your personalized AI interview journey."}
         </p>
       </section>
 
-      <section className="registration-card">
-        <div className="card-top">
-          <div>
-            <div className="step-number">01</div>
-
-            <div className="step-label">
-              {mode === "login"
-                ? "SECURE LOGIN"
-                : "CREATE ACCOUNT"}
-            </div>
-          </div>
-
-          <div className="system-status">
-            <span className="status-dot"></span>
-            SYSTEM READY
-          </div>
+      <section className="auth-card">
+        <div className="auth-card-heading">
+          <span>{mode === "login" ? "SECURE LOGIN" : "CREATE ACCOUNT"}</span>
+          <h2>
+            {mode === "login" ? "Welcome Back" : "Create Your Account"}
+          </h2>
         </div>
 
-        <h2>
-          {mode === "login"
-            ? "Welcome Back"
-            : "Create Your Account"}
-        </h2>
-
-        <p className="card-description">
-          {mode === "login"
-            ? "Sign in to continue to your AI-powered interview workspace."
-            : "Create your account to access personalized AI mock interviews."}
-        </p>
-
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="auth-form">
           {mode === "signup" && (
-            <div className="form-group">
+            <div className="auth-field">
               <label htmlFor="auth-name">FULL NAME</label>
-
-              <div className="input-wrapper">
-                <span className="input-icon">◇</span>
-
+              <div className="auth-input">
+                <span>✦</span>
                 <input
                   id="auth-name"
                   type="text"
                   value={name}
-                  onChange={(event) =>
-                    setName(event.target.value)
-                  }
+                  onChange={(event) => setName(event.target.value)}
                   placeholder="Enter your full name"
                   autoComplete="name"
-                  spellCheck="false"
                   disabled={loading}
                 />
               </div>
             </div>
           )}
 
-          <div className="form-group">
+          <div className="auth-field">
             <label htmlFor="auth-email">EMAIL ADDRESS</label>
-
-            <div className="input-wrapper">
-              <span className="input-icon">@</span>
-
+            <div className="auth-input">
+              <span>@</span>
               <input
                 id="auth-email"
                 type="email"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="Enter your email"
                 autoComplete="email"
-                spellCheck="false"
                 disabled={loading}
               />
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="auth-field">
             <label htmlFor="auth-password">PASSWORD</label>
-
-            <div className="input-wrapper">
-              <span className="input-icon">◈</span>
-
+            <div className="auth-input">
+              <span>◆</span>
               <input
                 id="auth-password"
                 type="password"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter your password"
                 autoComplete={
-                  mode === "login"
-                    ? "current-password"
-                    : "new-password"
+                  mode === "login" ? "current-password" : "new-password"
                 }
                 disabled={loading}
               />
             </div>
           </div>
 
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={loading}
-          >
+          <button className="iv-primary-button" type="submit" disabled={loading}>
             {loading
               ? mode === "login"
                 ? "SIGNING IN..."
@@ -220,20 +170,14 @@ function AuthView({ onLoginSuccess }) {
           </button>
         </form>
 
-        {message && (
-          <div className="message-box">
-            {message}
-          </div>
-        )}
+        {message && <div className="iv-message">{message}</div>}
 
         <div className="auth-switch">
           {mode === "login" ? (
             <>
               <span>Don't have an account?</span>
-
               <button
                 type="button"
-                className="text-button"
                 onClick={() => {
                   setMessage("");
                   setMode("signup");
@@ -246,10 +190,8 @@ function AuthView({ onLoginSuccess }) {
           ) : (
             <>
               <span>Already have an account?</span>
-
               <button
                 type="button"
-                className="text-button"
                 onClick={() => {
                   setMessage("");
                   setMode("login");
@@ -275,8 +217,6 @@ function App() {
      REFS
   ======================================================= */
 
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
   const recognitionRef = useRef(null);
 
   const answerRef = useRef("");
@@ -287,11 +227,9 @@ function App() {
 
   const suppressRecognitionAutoSubmitRef = useRef(false);
 
-  const speechSilenceTimeoutRef = useRef(null);
   const speechStartTimeoutRef = useRef(null);
 
   const recognitionSessionIdRef = useRef(0);
-  const questionTimerRef = useRef(null);
 
   /* =======================================================
      AUTH STATE
@@ -307,9 +245,15 @@ function App() {
     try {
       return JSON.parse(savedUser);
     } catch {
-      localStorage.removeItem("authUser");
-      return null;
-    }
+      if (authUser?.id && candidateId) {
+  localStorage.setItem(
+    `candidateId_${authUser.id}`,
+    String(candidateId)
+  );
+}
+  localStorage.removeItem("authUser");
+  return null;
+}
   });
 
   /* =======================================================
@@ -324,8 +268,26 @@ function App() {
     localStorage.getItem("candidateSkill") || ""
   );
 
-  const [candidateId, setCandidateId] = useState(
-    localStorage.getItem("candidateId") || ""
+  const [candidateId, setCandidateId] = useState(() => {
+  const savedUser = localStorage.getItem("authUser");
+
+  if (!savedUser) {
+    return "";
+  }
+
+  try {
+    const user = JSON.parse(savedUser);
+
+    return (
+      localStorage.getItem(`candidateId_${user.id}`) || ""
+    );
+  } catch {
+    return "";
+  }
+});
+
+  const [candidateType, setCandidateType] = useState(
+    localStorage.getItem("candidateType") || "technical"
   );
 
   /* =======================================================
@@ -345,6 +307,7 @@ function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answer, setAnswer] = useState("");
   const [results, setResults] = useState([]);
+  const [selectedResult, setSelectedResult] = useState(0);
 
   const [sessionId, setSessionId] = useState(
     localStorage.getItem("sessionId") || ""
@@ -373,15 +336,12 @@ function App() {
   const [interviewCompleted, setInterviewCompleted] =
     useState(false);
 
-  const [cameraOn, setCameraOn] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
 
-  const TOTAL_INTERVIEW_TIME_SECONDS = 20 * 60;
-  const QUESTION_TIME_SECONDS = 60;
+  const TOTAL_INTERVIEW_TIME_SECONDS = 15 * 60;
 
   const [timeLeft, setTimeLeft] = useState(TOTAL_INTERVIEW_TIME_SECONDS);
-  const [questionTimeLeft, setQuestionTimeLeft] = useState(QUESTION_TIME_SECONDS);
 
   /* =======================================================
      INTERVIEW COMPLETION HELPER
@@ -418,6 +378,15 @@ function App() {
   }, [candidateId]);
 
   useEffect(() => {
+    if (candidateType) {
+      localStorage.setItem(
+        "candidateType",
+        candidateType
+      );
+    }
+  }, [candidateType]);
+
+  useEffect(() => {
     if (sessionId) {
       localStorage.setItem(
         "sessionId",
@@ -426,28 +395,6 @@ function App() {
     }
   }, [sessionId]);
 
-  /* =======================================================
-     FORMAT TIMER
-  ======================================================= */
-
-  const formatTime = useCallback((seconds) => {
-    const safeSeconds = Math.max(0, seconds);
-
-    const minutes = Math.floor(
-      safeSeconds / 60
-    );
-
-    const remainingSeconds =
-      safeSeconds % 60;
-
-    return `${String(minutes).padStart(
-      2,
-      "0"
-    )}:${String(remainingSeconds).padStart(
-      2,
-      "0"
-    )}`;
-  }, []);
 
   /* =======================================================
      TIMER
@@ -472,7 +419,7 @@ function App() {
             !isSubmittingRef.current
           ) {
             setMessage(
-              "⏱️ The 20-minute interview limit has been reached. Finalizing the interview..."
+              "⏱️ The 15-minute interview limit has been reached. Finalizing the interview..."
             );
             suppressRecognitionAutoSubmitRef.current = true;
             submit({
@@ -521,80 +468,12 @@ function App() {
   );
 
   /* =======================================================
-     PER-QUESTION 60-SECOND TIMER
-  ======================================================= */
-
-  useEffect(() => {
-    if (
-      !interviewStarted ||
-      page !== "interview" ||
-      interviewCompletedRef.current ||
-      questions.length === 0 ||
-      !questions[currentQuestion]
-    ) {
-      return undefined;
-    }
-
-    setQuestionTimeLeft(QUESTION_TIME_SECONDS);
-
-    const timer = window.setInterval(() => {
-      setQuestionTimeLeft((previous) => {
-        if (previous <= 1) {
-          window.clearInterval(timer);
-
-          if (
-            !interviewCompletedRef.current &&
-            !isSubmittingRef.current &&
-            interviewStarted
-          ) {
-            const submit = submitAnswerRef.current;
-            if (submit) {
-              setMessage(
-                "⏱️ 60 seconds are over. Submitting this question..."
-              );
-              suppressRecognitionAutoSubmitRef.current = true;
-              submit({
-                preventDefault: () => {},
-                timedOut: true,
-              });
-            }
-          }
-
-          return 0;
-        }
-
-        return previous - 1;
-      });
-    }, 1000);
-
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [
-    interviewStarted,
-    page,
-    currentQuestion,
-    questions,
-  ]);
-
-  /* =======================================================
      CLEAR SPEECH TIMEOUTS
   ======================================================= */
 
   const clearSpeechTimeouts =
     useCallback(() => {
-      if (
-        speechSilenceTimeoutRef.current
-      ) {
-        window.clearTimeout(
-          speechSilenceTimeoutRef.current
-        );
-
-        speechSilenceTimeoutRef.current =
-          null;
-      }
-
-      if (
+if (
         speechStartTimeoutRef.current
       ) {
         window.clearTimeout(
@@ -629,83 +508,6 @@ function App() {
   }, [clearSpeechTimeouts]);
 
   /* =======================================================
-     STOP CAMERA
-  ======================================================= */
-
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current
-        .getTracks()
-        .forEach((track) => {
-          track.stop();
-        });
-
-      streamRef.current = null;
-    }
-
-    setCameraOn(false);
-  }, []);
-
-  /* =======================================================
-     START CAMERA
-  ======================================================= */
-
-  const startCamera = useCallback(async () => {
-    if (
-      !navigator.mediaDevices?.getUserMedia
-    ) {
-      setMessage(
-        "Camera access is not supported by this browser."
-      );
-
-      return;
-    }
-
-    try {
-      const stream =
-        await navigator.mediaDevices.getUserMedia(
-          {
-            video: true,
-            audio: false,
-          }
-        );
-
-      streamRef.current = stream;
-
-      setCameraOn(true);
-    } catch (error) {
-      console.error(
-        "Camera error:",
-        error
-      );
-
-      setCameraOn(false);
-
-      setMessage(
-        "Camera permission is required for the live interview."
-      );
-    }
-  }, []);
-
-  /* =======================================================
-     CONNECT STREAM TO VIDEO
-  ======================================================= */
-
-  useEffect(() => {
-    if (!cameraOn) {
-      return;
-    }
-
-    if (
-      videoRef.current &&
-      streamRef.current
-    ) {
-      videoRef.current.srcObject =
-        streamRef.current;
-    }
-  }, [cameraOn]);
-
-  /* =======================================================
      SPEECH RECOGNITION
   ======================================================= */
 
@@ -730,19 +532,7 @@ function App() {
 
       return;
     }
-
-    if (
-      speechSilenceTimeoutRef.current
-    ) {
-      window.clearTimeout(
-        speechSilenceTimeoutRef.current
-      );
-
-      speechSilenceTimeoutRef.current =
-        null;
-    }
-
-    if (recognitionRef.current) {
+if (recognitionRef.current) {
       suppressRecognitionAutoSubmitRef.current =
         true;
 
@@ -859,76 +649,6 @@ function App() {
       answerRef.current = combined;
       setAnswer(combined);
 
-      /*
-       * Automatic submission after silence.
-       */
-      if (
-        finalTranscript.trim() &&
-        !isSubmittingRef.current
-      ) {
-        if (
-          speechSilenceTimeoutRef.current
-        ) {
-          window.clearTimeout(
-            speechSilenceTimeoutRef.current
-          );
-        }
-
-        speechSilenceTimeoutRef.current =
-          window.setTimeout(() => {
-            speechSilenceTimeoutRef.current =
-              null;
-
-            if (
-              interviewCompletedRef.current ||
-              isSubmittingRef.current ||
-              !interviewStarted ||
-              thisRecognitionSession !==
-                recognitionSessionIdRef.current
-            ) {
-              return;
-            }
-
-            const capturedText =
-              finalTranscript.trim();
-
-            if (!capturedText) {
-              return;
-            }
-
-            answerRef.current =
-              capturedText;
-
-            setAnswer(capturedText);
-
-            setMessage(
-              "✅ Voice answer captured. AI is evaluating..."
-            );
-
-            suppressRecognitionAutoSubmitRef.current =
-              true;
-
-            try {
-              recognition.stop();
-            } catch {
-              // Already stopped.
-            }
-
-            if (
-              recognitionRef.current ===
-              recognition
-            ) {
-              recognitionRef.current =
-                null;
-            }
-
-            setIsListening(false);
-
-            submitAnswerRef.current?.({
-              preventDefault: () => {},
-            });
-          }, 1400);
-      }
     };
 
     recognition.onerror = (event) => {
@@ -968,10 +688,7 @@ function App() {
           return;
         }
 
-        setMessage(
-          "No speech detected. Please speak your answer."
-        );
-
+        // Keep the answer field available; silence must never submit an answer.
         return;
       }
 
@@ -983,95 +700,58 @@ function App() {
     };
 
     recognition.onend = () => {
-      if (
-        thisRecognitionSession !==
-        recognitionSessionIdRef.current
-      ) {
-        return;
-      }
+  if (
+    thisRecognitionSession !==
+    recognitionSessionIdRef.current
+  ) {
+    return;
+  }
 
-      if (
-        recognitionRef.current ===
-        recognition
-      ) {
-        recognitionRef.current =
-          null;
-      }
+  if (
+    recognitionRef.current ===
+    recognition
+  ) {
+    recognitionRef.current = null;
+  }
 
-      setIsListening(false);
+  setIsListening(false);
 
-      if (
-        suppressRecognitionAutoSubmitRef.current
-      ) {
-        suppressRecognitionAutoSubmitRef.current =
-          false;
+  if (
+    suppressRecognitionAutoSubmitRef.current
+  ) {
+    suppressRecognitionAutoSubmitRef.current =
+      false;
 
-        return;
-      }
+    return;
+  }
 
-      if (
-        interviewCompletedRef.current ||
-        isSubmittingRef.current ||
-        !interviewStarted
-      ) {
-        return;
-      }
+  if (
+    interviewCompletedRef.current ||
+    isSubmittingRef.current ||
+    !interviewStarted
+  ) {
+    return;
+  }
 
-      const capturedAnswer =
-        finalTranscript.trim();
+  const capturedAnswer =
+    finalTranscript.trim();
 
-      if (capturedAnswer) {
-        answerRef.current =
-          capturedAnswer;
+  if (capturedAnswer) {
+    answerRef.current = capturedAnswer;
+    setAnswer(capturedAnswer);
 
-        setAnswer(capturedAnswer);
+    setMessage(
+      "🎙️ Voice recognition paused. Your answer is saved. Submit it when you are ready."
+    );
 
-        if (
-          speechSilenceTimeoutRef.current
-        ) {
-          window.clearTimeout(
-            speechSilenceTimeoutRef.current
-          );
+    return;
+  }
 
-          speechSilenceTimeoutRef.current =
-            null;
-        }
+  // Hide the listening prompt when voice recognition stops without captured speech.
+  // It will appear again when the user clicks "Answer by Voice".
+  setMessage("");
+};
 
-        setMessage(
-          "✅ Voice answer captured. AI is evaluating..."
-        );
-
-        speechSilenceTimeoutRef.current =
-          window.setTimeout(() => {
-            speechSilenceTimeoutRef.current =
-              null;
-
-            if (
-              interviewCompletedRef.current ||
-              isSubmittingRef.current ||
-              !interviewStarted ||
-              !submitAnswerRef.current
-            ) {
-              return;
-            }
-
-            suppressRecognitionAutoSubmitRef.current =
-              true;
-
-            submitAnswerRef.current({
-              preventDefault: () => {},
-            });
-          }, 250);
-
-        return;
-      }
-
-      if (!hasReceivedSpeech) {
-        setMessage(
-          "No speech detected. Please speak your answer."
-        );
-      }
-    };
 
     recognitionRef.current =
       recognition;
@@ -1099,6 +779,22 @@ function App() {
       );
     }
   }, [interviewStarted]);
+
+  /* =======================================================
+     VOICE ANSWER BUTTON HANDLER
+  ======================================================= */
+
+  const handleVoiceAnswer = useCallback(() => {
+    clearSpeechTimeouts();
+
+    suppressRecognitionAutoSubmitRef.current =
+      false;
+
+    startListening();
+  }, [
+    clearSpeechTimeouts,
+    startListening,
+  ]);
 
   /* =======================================================
      SPEAK QUESTION
@@ -1336,15 +1032,7 @@ function App() {
         window.speechSynthesis.cancel();
       }
 
-      if (streamRef.current) {
-        streamRef.current
-          .getTracks()
-          .forEach((track) => {
-            track.stop();
-          });
 
-        streamRef.current = null;
-      }
     };
   }, [clearSpeechTimeouts]);
 
@@ -1352,26 +1040,147 @@ function App() {
      LOGIN SUCCESS
   ======================================================= */
 
-  const handleLoginSuccess = (user) => {
-    setAuthUser(user);
+ const handleLoginSuccess = async (user) => {
+  setAuthUser(user);
 
-    if (user?.name) {
-      setName(user.name);
+  if (user?.name) {
+    setName(user.name);
+  }
+
+  setMessage("");
+
+  /*
+   * Each login account gets its own candidate profile.
+   * Existing candidate mappings are reused.
+   */
+  const savedCandidateId = user?.id
+    ? localStorage.getItem(
+        `candidateId_${user.id}`
+      ) || ""
+    : "";
+
+  const legacyCandidateId =
+    localStorage.getItem("candidateId") || "";
+
+  const legacyCandidateName =
+    localStorage.getItem("candidateName") || "";
+
+  let resolvedCandidateId =
+    savedCandidateId;
+
+  /*
+   * Recover an older candidate only when the
+   * saved candidate name belongs to this user.
+   */
+  if (
+    !resolvedCandidateId &&
+    user?.name &&
+    legacyCandidateName.trim().toLowerCase() ===
+      user.name.trim().toLowerCase() &&
+    legacyCandidateId
+  ) {
+    resolvedCandidateId =
+      legacyCandidateId;
+  }
+
+  /*
+   * If this login account does not have a candidate
+   * profile yet, create one automatically.
+   */
+  if (
+    !resolvedCandidateId &&
+    user?.name
+  ) {
+    try {
+      const candidateResponse =
+        await axios.post(
+          `${API}/candidate`,
+          {
+            name: user.name.trim(),
+            skill:
+              candidateType === "non_technical"
+                ? "general"
+                : "auto",
+            candidate_type:
+              candidateType || "technical",
+          }
+        );
+
+      resolvedCandidateId =
+        candidateResponse.data?.candidate_id ||
+        candidateResponse.data?.id ||
+        candidateResponse.data?.candidateId ||
+        "";
+    } catch (error) {
+      console.error(
+        "Automatic candidate creation failed:",
+        error
+      );
+
+      console.error(
+        "Backend candidate response:",
+        error.response?.data
+      );
+
+      setCandidateId("");
+      setMessage(
+        "Unable to initialize your candidate profile. Please try logging in again."
+      );
+
+      return;
     }
+  }
 
-    interviewCompletedRef.current =
-      false;
+  /*
+   * Save the candidate ID permanently for this
+   * specific login account.
+   */
+  if (
+    user?.id &&
+    resolvedCandidateId
+  ) {
+    localStorage.setItem(
+      `candidateId_${user.id}`,
+      String(resolvedCandidateId)
+    );
+  }
 
-    setInterviewCompleted(false);
+  if (resolvedCandidateId) {
+    localStorage.setItem(
+      "candidateId",
+      String(resolvedCandidateId)
+    );
 
-    suppressRecognitionAutoSubmitRef.current =
-      false;
+    setCandidateId(
+      String(resolvedCandidateId)
+    );
+  } else {
+    localStorage.removeItem(
+      "candidateId"
+    );
 
-    isSubmittingRef.current = false;
+    setCandidateId("");
+  }
 
-    setMessage("");
-    setPage("home");
-  };
+  setSessionId("");
+
+  localStorage.removeItem(
+    "sessionId"
+  );
+
+  interviewCompletedRef.current =
+    false;
+
+  setInterviewCompleted(false);
+
+  suppressRecognitionAutoSubmitRef.current =
+    false;
+
+  isSubmittingRef.current =
+    false;
+
+  setPage("home");
+};
 
   /* =======================================================
      LOGOUT
@@ -1402,7 +1211,6 @@ function App() {
     }
 
     stopListening();
-    stopCamera();
 
     if (
       "speechSynthesis" in window
@@ -1472,6 +1280,7 @@ function App() {
           setResults(
             response.data
           );
+          setSelectedResult(0);
         } else if (
           Array.isArray(
             response.data?.results
@@ -1480,6 +1289,7 @@ function App() {
           setResults(
             response.data.results
           );
+          setSelectedResult(0);
         } else {
           setResults([]);
         }
@@ -1563,8 +1373,7 @@ function App() {
         window.speechSynthesis.cancel();
       }
 
-      stopCamera();
-    }
+      }
 
     if (
       destination === "results"
@@ -1601,7 +1410,9 @@ function App() {
         name.trim();
 
       const cleanSkill =
-        skill.trim().toLowerCase();
+        candidateType === "non_technical"
+          ? "general"
+          : "auto";
 
       if (!cleanName) {
         setMessage(
@@ -1611,31 +1422,7 @@ function App() {
         return;
       }
 
-      if (!cleanSkill) {
-        setMessage(
-          "Please select your primary skill."
-        );
 
-        return;
-      }
-
-      const allowedSkills = [
-        "python",
-        "java",
-        "javascript",
-      ];
-
-      if (
-        !allowedSkills.includes(
-          cleanSkill
-        )
-      ) {
-        setMessage(
-          "Skill must be Python, Java, or JavaScript."
-        );
-
-        return;
-      }
 
       try {
         setLoading(true);
@@ -1646,6 +1433,7 @@ function App() {
             {
               name: cleanName,
               skill: cleanSkill,
+              candidate_type: candidateType,
             }
           );
 
@@ -1695,6 +1483,7 @@ function App() {
 
         setName(cleanName);
         setSkill(cleanSkill);
+        setCandidateType(candidateType);
 
         setCandidateId(
           String(newCandidateId)
@@ -1725,9 +1514,20 @@ function App() {
         );
 
         localStorage.setItem(
+          "candidateType",
+          candidateType
+        );
+
+        localStorage.setItem(
           "candidateId",
           String(newCandidateId)
         );
+        if (authUser?.id) {
+  localStorage.setItem(
+    `candidateId_${authUser.id}`,
+    String(newCandidateId)
+  );
+}
 
         localStorage.removeItem(
           "sessionId"
@@ -1780,9 +1580,17 @@ function App() {
   ======================================================= */
 
   const uploadResume = async () => {
-    setMessage("");
+  setMessage("");
 
-    if (!candidateId) {
+  const uploadCandidateId =
+    candidateId ||
+    (authUser?.id
+      ? localStorage.getItem(
+          `candidateId_${authUser.id}`
+        )
+      : "");
+
+  if (!uploadCandidateId) {
       setMessage(
         "Please initialize your candidate profile before uploading your resume."
       );
@@ -1845,16 +1653,10 @@ function App() {
       );
 
       const response =
-        await axios.post(
-          `${API}/resume/upload/${candidateId}`,
-          formData,
-          {
-            headers: {
-              "Content-Type":
-                "multipart/form-data",
-            },
-          }
-        );
+  await axios.post(
+    `${API}/resume/upload/${uploadCandidateId}`,
+    formData
+  );
 
       console.log(
         "Resume upload response:",
@@ -1934,16 +1736,6 @@ function App() {
       return;
     }
 
-    if (!skill) {
-      setMessage(
-        "Please select your primary skill first."
-      );
-
-      setPage("home");
-
-      return;
-    }
-
     try {
       setLoading(true);
 
@@ -1985,7 +1777,7 @@ function App() {
 
       const response =
         await axios.get(
-          `${API}/interview/start/${skill.toLowerCase()}`,
+          `${API}/interview/start-candidate/${candidateId}`,
           {
             params: {
               candidate_id:
@@ -2062,7 +1854,6 @@ function App() {
       setAnswer("");
 
       setTimeLeft(TOTAL_INTERVIEW_TIME_SECONDS);
-      setQuestionTimeLeft(QUESTION_TIME_SECONDS);
 
       suppressRecognitionAutoSubmitRef.current =
         false;
@@ -2106,10 +1897,11 @@ function App() {
      SUBMIT ANSWER
   ======================================================= */
 
-  const submitAnswer = useCallback(async (event) => {
+  const submitAnswer = async (event) => {
     event.preventDefault();
 
     const timedOut = event?.timedOut === true;
+
     if (
       interviewCompletedRef.current
     ) {
@@ -2258,12 +2050,6 @@ function App() {
         clearSpeechTimeouts();
 
         setInterviewStarted(false);
-
-        if (questionTimerRef.current) {
-          window.clearTimeout(questionTimerRef.current);
-          questionTimerRef.current = null;
-        }
-
         recognitionSessionIdRef.current += 1;
 
         if (recognitionRef.current) {
@@ -2276,11 +2062,7 @@ function App() {
           recognitionRef.current =
             null;
         }
-
-        setIsListening(false);
-
-        stopCamera();
-
+       setIsListening(false);
         if (
           "speechSynthesis" in window
         ) {
@@ -2382,11 +2164,7 @@ function App() {
         recognitionRef.current =
           null;
       }
-
-      setIsListening(false);
-
-      stopCamera();
-
+     setIsListening(false);
       if (
         "speechSynthesis" in window
       ) {
@@ -2439,24 +2217,14 @@ function App() {
 
       suppressRecognitionAutoSubmitRef.current =
         false;
-            } finally {
+    } finally {
       isSubmittingRef.current =
         false;
 
       setLoading(false);
     }
-  }, [
-    answer,
-    candidateId,
-    clearSpeechTimeouts,
-    currentQuestion,
-    getQuestionText,
-    loadResults,
-    markInterviewCompleted,
-    questions,
-    sessionId,
-    stopCamera,
-  ]);
+  };
+
   /*
    * IMPORTANT FIX:
    *
@@ -2474,33 +2242,7 @@ function App() {
   useEffect(() => {
     submitAnswerRef.current =
       submitAnswer;
-  }, [submitAnswer]);
-
-    /* =======================================================
-     MANUAL VOICE ANSWER HANDLER
-  ======================================================= */
-
-  const handleVoiceAnswer = useCallback(() => {
-    if (
-      loading ||
-      isListening ||
-      interviewCompletedRef.current
-    ) {
-      return;
-    }
-
-    clearSpeechTimeouts();
-
-    suppressRecognitionAutoSubmitRef.current =
-      false;
-
-    startListening();
-  }, [
-    loading,
-    isListening,
-    clearSpeechTimeouts,
-    startListening,
-  ]);
+  });
 
   /* =======================================================
      PERFORMANCE
@@ -2584,634 +2326,159 @@ function App() {
   ======================================================= */
 
   const renderHome = () => {
+    const displayName = authUser?.name || name || "Candidate";
+    const candidateLabel = candidateId ? `#${candidateId}` : "Not registered";
+    const skillLabel = skill ? skill.toUpperCase() : "GENERAL";
+
     return (
-      <main className="dashboard-page">
-
-        <section className="dashboard-header">
+      <main className="workspace-page home-page">
+        <section className="page-heading home-heading">
           <div>
-            <span className="eyebrow">
-              AI INTERVIEW COMMAND CENTER
-            </span>
-
-            <h1>
-              Welcome back,
-              <span>
-                {" "}
-                {authUser?.name ||
-                  name ||
-                  "Candidate"}
-              </span>
-            </h1>
-
-            <p>
-              Your personalized AI interview
-              workspace is ready. Prepare,
-              practice, and measure your
-              technical performance.
-            </p>
+            <span className="section-kicker">AI INTERVIEW WORKSPACE</span>
+            <h1>Welcome back, {displayName}.</h1>
+            <p>Prepare, practice and measure your interview performance with INTERVIA.</p>
           </div>
+          <div className="online-pill"><span /> AI SYSTEM ONLINE</div>
+        </section>
 
-          <div className="dashboard-status">
-            <span className="status-dot"></span>
-            AI SYSTEM ONLINE
-          </div>
+        <section className="stats-grid">
+          <article className="stat-card stat-card-accent">
+            <div className="stat-icon">◎</div>
+            <span>CANDIDATE</span>
+            <strong>{candidateLabel}</strong>
+            <small>{candidateType === "technical" ? "Technical background" : "Non-technical background"}</small>
+          </article>
+          <article className="stat-card">
+            <div className="stat-icon">✦</div>
+            <span>PRIMARY SKILL</span>
+            <strong>{skillLabel}</strong>
+            <small>{resumeUploaded ? "Resume personalized" : "General interview profile"}</small>
+          </article>
+          <article className="stat-card">
+            <div className="stat-icon">✓</div>
+            <span>INTERVIEW STATUS</span>
+            <strong>{interviewCompleted ? "COMPLETED" : "READY"}</strong>
+            <small>{interviewCompleted ? "View your latest results" : "15-minute assessment"}</small>
+          </article>
         </section>
 
         <section className="dashboard-grid">
-
-          <div className="dashboard-card profile-card">
-            <div className="dashboard-card-header">
+          <article className="dashboard-card resume-panel">
+            <div className="panel-heading">
               <div>
-                <span className="card-mini-label">
-                  CANDIDATE PROFILE
-                </span>
-
-                <h2>
-                  {name ||
-                    authUser?.name ||
-                    "Candidate"}
-                </h2>
+                <span className="section-kicker">RESUME INTELLIGENCE</span>
+                <h2>{resumeUploaded ? "Resume analyzed successfully" : "Personalize your AI interview"}</h2>
               </div>
-
-              <div className="profile-avatar">
-                {(
-                  name ||
-                  authUser?.name ||
-                  "C"
-                )
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
-            </div>
-
-            <div className="profile-details">
-              <div>
-                <span>
-                  CANDIDATE ID
-                </span>
-
-                <strong>
-                  {candidateId
-                    ? `#${candidateId}`
-                    : "Not initialized"}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  PRIMARY SKILL
-                </span>
-
-                <strong>
-                  {skill
-                    ? skill.toUpperCase()
-                    : "Not selected"}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  ACCOUNT
-                </span>
-
-                <strong>
-                  ACTIVE
-                </strong>
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-card performance-card">
-            <div className="dashboard-card-header">
-              <div>
-                <span className="card-mini-label">
-                  PERFORMANCE
-                </span>
-
-                <h2>
-                  {performance.average}%
-                </h2>
-              </div>
-
-              <div className="performance-icon">
-                ◈
-              </div>
-            </div>
-
-            <div className="performance-line">
-              <div
-                style={{
-                  width: `${performance.average}%`,
-                }}
-              ></div>
-            </div>
-
-            <p>
-              {results.length > 0
-                ? `${performance.title} — based on your latest interview results.`
-                : "Complete your first interview to generate your performance score."}
-            </p>
-          </div>
-
-          <div className="dashboard-card status-card">
-            <div className="dashboard-card-header">
-              <div>
-                <span className="card-mini-label">
-                  INTERVIEW STATUS
-                </span>
-
-                <h2>
-                  {interviewStarted
-                    ? "IN PROGRESS"
-                    : results.length > 0
-                    ? "COMPLETED"
-                    : "READY"}
-                </h2>
-              </div>
-
-              <div className="status-icon">
-                {interviewStarted
-                  ? "●"
-                  : "✓"}
-              </div>
-            </div>
-
-            <p>
-              {interviewStarted
-                ? "Your AI technical assessment is currently active."
-                : results.length > 0
-                ? "Your latest interview has been evaluated."
-                : "Your AI interview environment is ready to begin."}
-            </p>
-          </div>
-        </section>
-
-        <section className="dashboard-resume-card">
-
-          <div className="resume-card-header">
-            <div>
-              <span className="eyebrow">
-                RESUME INTELLIGENCE
+              <span className={`status-tag ${resumeUploaded ? "success" : "neutral"}`}>
+                {resumeUploaded ? "ANALYZED" : "READY"}
               </span>
-
-              <h2>
-                Personalize Your AI Interview
-              </h2>
-
-              <p>
-                Upload your resume so the AI
-                interviewer can generate
-                questions based on your actual
-                skills, projects, experience,
-                and technologies.
-              </p>
             </div>
 
-            <div className="resume-status">
-              <span
-                className={
-                  resumeUploaded
-                    ? "status-dot active"
-                    : "status-dot"
-                }
-              ></span>
+            <p className="panel-description">
+              Upload your resume and INTERVIA will use your skills, projects, experience and technologies to personalize your questions.
+            </p>
 
-              {resumeUploaded
-                ? "RESUME ANALYZED"
-                : "RESUME NOT UPLOADED"}
-            </div>
-          </div>
-
-          <div className="resume-upload-area">
-
-            <div className="resume-file-input">
-
-              <label htmlFor="resume-upload">
-                SELECT RESUME
-              </label>
-
+            <div className="resume-upload-box">
+              <div className="resume-file-info">
+                <div className="file-icon">PDF</div>
+                <div>
+                  <strong>{resumeName || "Choose your resume"}</strong>
+                  <span>PDF or DOCX · Resume-aware interview questions</span>
+                </div>
+              </div>
+              <label className="outline-button" htmlFor="resume-upload">Choose File</label>
               <input
                 id="resume-upload"
                 type="file"
                 accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 onChange={(event) => {
-                  const file =
-                    event.target.files?.[0] ||
-                    null;
-
+                  const file = event.target.files?.[0] || null;
                   setResumeFile(file);
-
                   if (file) {
-                    setResumeName(
-                      file.name
-                    );
-
-                    setResumeUploaded(
-                      false
-                    );
-
+                    setResumeName(file.name);
+                    setResumeUploaded(false);
                     setMessage("");
                   } else {
                     setResumeName("");
                   }
                 }}
-                disabled={
-                  resumeUploading ||
-                  !candidateId
-                }
+                disabled={resumeUploading}
               />
-
-              {resumeName && (
-                <div className="resume-selected-file">
-                  <span>📄</span>
-
-                  <strong>
-                    {resumeName}
-                  </strong>
-                </div>
-              )}
-
-            </div>
-
-            <button
-              type="button"
-              className="primary-button"
-              onClick={uploadResume}
-              disabled={
-                resumeUploading ||
-                !resumeFile ||
-                !candidateId
-              }
-            >
-              {resumeUploading
-                ? "ANALYZING RESUME..."
-                : resumeUploaded
-                ? "UPDATE RESUME →"
-                : "UPLOAD & ANALYZE →"}
-            </button>
-
-          </div>
-
-          <div className="resume-info-grid">
-
-            <div>
-              <span>
-                SUPPORTED FORMAT
-              </span>
-
-              <strong>
-                PDF / DOCX
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                AI PERSONALIZATION
-              </span>
-
-              <strong>
-                {resumeUploaded
-                  ? "ACTIVE"
-                  : "READY"}
-              </strong>
-            </div>
-
-            <div>
-              <span>
-                CANDIDATE
-              </span>
-
-              <strong>
-                {candidateId
-                  ? `#${candidateId}`
-                  : "NOT INITIALIZED"}
-              </strong>
-            </div>
-
-          </div>
-
-        </section>
-
-        <section className="dashboard-action">
-          <div className="action-content">
-            <div className="action-icon">
-              AI
-            </div>
-
-            <div>
-              <span className="eyebrow">
-                NEXT ACTION
-              </span>
-
-              <h2>
-                Ready to test your skills?
-              </h2>
-
-              <p>
-                Start a personalized
-                technical interview
-                generated for your
-                selected skill.
-              </p>
-            </div>
-          </div>
-
-          <div className="action-buttons">
-
-            <button
-              type="button"
-              className="primary-button dashboard-start-button"
-              onClick={startInterview}
-              disabled={
-                loading ||
-                !candidateId ||
-                !skill
-              }
-            >
-              {loading
-                ? "INITIALIZING AI..."
-                : "START AI INTERVIEW →"}
-            </button>
-
-            {results.length > 0 && (
               <button
                 type="button"
-                className="secondary-button dashboard-results-button"
-                onClick={async () => {
-                  await loadResults(
-                    candidateId,
-                    sessionId
-                  );
-
-                  setPage("results");
-                }}
+                className="primary-button"
+                onClick={uploadResume}
+                disabled={resumeUploading || !resumeFile}
               >
-                VIEW RESULTS
+                {resumeUploading ? "Analyzing..." : resumeUploaded ? "Update Resume" : "Upload & Analyze"}
               </button>
-            )}
+            </div>
 
-          </div>
+            <div className="feature-line">
+              <span>✓ Resume extraction</span>
+              <span>✓ Personalized questions</span>
+              <span>✓ Technical + aptitude mix</span>
+            </div>
+            {message && <div className="inline-message">{message}</div>}
+          </article>
+
+          <article className="dashboard-card start-panel">
+            <div className="start-illustration">✦</div>
+            <span className="section-kicker">NEXT ACTION</span>
+            <h2>Ready to test your skills?</h2>
+            <p>
+              Start a personalized 20-question interview with one overall 15-minute timer.
+            </p>
+            <div className="start-details">
+              <div><span>Questions</span><strong>20</strong></div>
+              <div><span>Duration</span><strong>15 min</strong></div>
+              <div><span>Voice</span><strong>Enabled</strong></div>
+            </div>
+            <button
+              type="button"
+              className="primary-button large-button"
+              onClick={startInterview}
+              disabled={loading || !candidateId || !skill}
+            >
+              {loading ? "Initializing AI..." : "Start Interview →"}
+            </button>
+          </article>
         </section>
 
         {!candidateId && (
-          <section className="dashboard-setup-card">
-
-            <div className="setup-number">
-              01
+          <section className="dashboard-card setup-panel">
+            <div className="panel-heading">
+              <div>
+                <span className="section-kicker">PROFILE SETUP</span>
+                <h2>Complete your candidate profile</h2>
+              </div>
             </div>
-
-            <div className="setup-content">
-
-              <span className="card-mini-label">
-                PROFILE INITIALIZATION REQUIRED
-              </span>
-
-              <h2>
-                Configure your interview profile
-              </h2>
-
-              <p>
-                Select your primary technical
-                skill before starting your
-                first AI interview.
-              </p>
-
-              <form
-                className="dashboard-profile-form"
-                onSubmit={
-                  registerCandidate
-                }
-              >
-
-                <div className="dashboard-input">
-                  <label htmlFor="dashboard-name">
-                    FULL NAME
-                  </label>
-
-                  <input
-                    id="dashboard-name"
-                    type="text"
-                    value={name}
-                    onChange={(event) =>
-                      setName(
-                        event.target.value
-                      )
-                    }
-                    placeholder="Your full name"
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="dashboard-input">
-                  <label htmlFor="dashboard-skill">
-                    PRIMARY SKILL
-                  </label>
-
-                  <select
-                    id="dashboard-skill"
-                    value={skill}
-                    onChange={(event) =>
-                      setSkill(
-                        event.target.value
-                      )
-                    }
-                    disabled={loading}
-                  >
-                    <option value="">
-                      Select skill
-                    </option>
-
-                    <option value="python">
-                      Python
-                    </option>
-
-                    <option value="java">
-                      Java
-                    </option>
-
-                    <option value="javascript">
-                      JavaScript
-                    </option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  className="primary-button"
-                  disabled={loading}
-                >
-                  {loading
-                    ? "INITIALIZING..."
-                    : "INITIALIZE PROFILE →"}
-                </button>
-
-              </form>
-            </div>
+            <p className="panel-description">Choose the candidate background and primary skill before starting your assessment.</p>
+            <form className="setup-grid" onSubmit={async (event) => { event.preventDefault(); await registerCandidate(event); }}>
+              <div className="field-group">
+                <label htmlFor="candidate-name">FULL NAME</label>
+                <input id="candidate-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Enter your full name" />
+              </div>
+              <div className="field-group">
+                <label htmlFor="candidate-skill">PRIMARY SKILL</label>
+                <select id="candidate-skill" value={skill} onChange={(event) => setSkill(event.target.value)}>
+                  <option value="">Select skill</option>
+                  <option value="python">Python</option>
+                  <option value="java">Java</option>
+                  <option value="javascript">JavaScript</option>
+                </select>
+              </div>
+              <div className="field-group">
+                <label htmlFor="candidate-type">BACKGROUND</label>
+                <select id="candidate-type" value={candidateType} onChange={(event) => setCandidateType(event.target.value)}>
+                  <option value="technical">Technical</option>
+                  <option value="non_technical">Non-Technical</option>
+                </select>
+              </div>
+              <button className="primary-button" type="submit">Create Profile →</button>
+            </form>
           </section>
         )}
-
-        <section className="dashboard-section">
-
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">
-                ACTIVITY
-              </span>
-
-              <h2>
-                Recent Interview Activity
-              </h2>
-            </div>
-
-            <button
-              type="button"
-              className="text-button"
-              onClick={async () => {
-                await loadResults(
-                  candidateId,
-                  sessionId
-                );
-
-                setPage("results");
-              }}
-            >
-              View all →
-            </button>
-          </div>
-
-          {results.length > 0 ? (
-            <div className="activity-list">
-
-              {results
-                .slice(0, 3)
-                .map(
-                  (result, index) => (
-                    <div
-                      className="activity-item"
-                      key={index}
-                    >
-
-                      <div className="activity-number">
-                        {String(
-                          index + 1
-                        ).padStart(
-                          2,
-                          "0"
-                        )}
-                      </div>
-
-                      <div className="activity-question">
-                        <span>
-                          TECHNICAL QUESTION
-                        </span>
-
-                        <p>
-                          {result.question ||
-                            result.question_text ||
-                            "Interview question"}
-                        </p>
-                      </div>
-
-                      <div className="activity-score">
-                        <strong>
-                          {result.score ??
-                            "--"}
-                        </strong>
-
-                        <span>
-                          / 10
-                        </span>
-                      </div>
-
-                    </div>
-                  )
-                )}
-
-            </div>
-          ) : (
-            <div className="dashboard-empty">
-
-              <div className="empty-icon">
-                ◈
-              </div>
-
-              <h3>
-                No interview activity yet
-              </h3>
-
-              <p>
-                Your interview scores and
-                evaluation history will
-                appear here after you
-                complete an AI interview.
-              </p>
-
-            </div>
-          )}
-
-        </section>
-
-        <section className="feature-grid">
-
-          <div className="feature-card">
-            <div className="feature-icon">
-              AI
-            </div>
-
-            <div>
-              <h3>
-                AI Evaluation
-              </h3>
-
-              <p>
-                Intelligent analysis of
-                your technical answers.
-              </p>
-            </div>
-          </div>
-
-          <div className="feature-card">
-            <div className="feature-icon">
-              01
-            </div>
-
-            <div>
-              <h3>
-                Skill Assessment
-              </h3>
-
-              <p>
-                Questions generated around
-                your selected skill.
-              </p>
-            </div>
-          </div>
-
-          <div className="feature-card">
-            <div className="feature-icon">
-              ↑
-            </div>
-
-            <div>
-              <h3>
-                Track Progress
-              </h3>
-
-              <p>
-                Monitor your performance
-                across interviews.
-              </p>
-            </div>
-          </div>
-
-        </section>
-
-        {message && (
-          <div className="message-box dashboard-message">
-            {message}
-          </div>
-        )}
-
       </main>
     );
   };
@@ -3223,321 +2490,107 @@ function App() {
   const renderInterview = () => {
     if (!candidateId) {
       return (
-        <main className="page-container">
-          <div className="empty-card">
-
-            <h2>
-              No Candidate Registered
-            </h2>
-
-            <p>
-              Please register before
-              starting an interview.
-            </p>
-
-            <button
-              type="button"
-              className="primary-button small-button"
-              onClick={() =>
-                setPage("home")
-              }
-            >
-              GO TO REGISTRATION
-            </button>
-
-          </div>
+        <main className="workspace-page centered-page">
+          <section className="empty-state-card">
+            <div className="empty-icon">AI</div>
+            <span className="section-kicker">INTERVIEW</span>
+            <h1>No candidate registered</h1>
+            <p>Please complete your candidate profile before starting your interview.</p>
+            <button type="button" className="primary-button" onClick={() => setPage("home")}>Go to Dashboard →</button>
+          </section>
         </main>
       );
     }
 
     if (questions.length === 0) {
       return (
-        <main className="page-container">
-
-          <div className="interview-card">
-
-            <div className="interview-header">
-
-              <div>
-                <span className="eyebrow">
-                  AI INTERVIEW
-                </span>
-
-                <h1>
-                  Ready for your interview?
-                </h1>
-              </div>
-
-              <div className="candidate-pill">
-                #{candidateId}
-              </div>
-
-            </div>
-
-            <p>
-              Your interview will be
-              generated according to your
-              selected technical skill.
-            </p>
-
-            <button
-              type="button"
-              className="primary-button"
-              onClick={startInterview}
-              disabled={loading}
-            >
-              {loading
-                ? "INITIALIZING..."
-                : "START INTERVIEW"}
+        <main className="workspace-page centered-page">
+          <section className="empty-state-card">
+            <div className="empty-icon">✦</div>
+            <span className="section-kicker">AI INTERVIEW</span>
+            <h1>Ready for your interview?</h1>
+            <p>Your questions will be generated from your candidate profile and uploaded resume.</p>
+            <button type="button" className="primary-button" onClick={startInterview} disabled={loading}>
+              {loading ? "Initializing..." : "Start Interview →"}
             </button>
-
-            {message && (
-              <div className="message-box">
-                {message}
-              </div>
-            )}
-
-          </div>
+            {message && <div className="inline-message">{message}</div>}
+          </section>
         </main>
       );
     }
 
-    const questionText =
-      getQuestionText(
-        questions[currentQuestion]
-      );
-
-    const progress =
-      ((currentQuestion + 1) /
-        20) *
-      100;
+    const questionText = getQuestionText(questions[currentQuestion]);
+    const progress = Math.min(((currentQuestion + 1) / 20) * 100, 100);
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
 
     return (
-      <main className="page-container">
-
-        <div className="interview-card">
-
+      <main className="workspace-page interview-page">
+        <section className="interview-shell">
           <div className="interview-header">
-
             <div>
-              <span className="eyebrow">
-                LIVE AI INTERVIEW
-              </span>
-
-              <h1>
-                Technical Assessment
-              </h1>
+              <span className="section-kicker">LIVE AI INTERVIEW</span>
+              <h1>Technical Assessment</h1>
+              <p>Answer naturally. INTERVIA evaluates relevance, quality and response consistency.</p>
             </div>
+            <div className="interview-meta">
+              <span className="timer-badge">⏱ {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}</span>
+              <span className="question-badge">Question {currentQuestion + 1} / 20</span>
+            </div>
+          </div>
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          </div>
 
-            <div className="interview-header-right">
-
-              <div className="interview-timer">
-                ⏱{" "}
-                {formatTime(
-                  timeLeft
-                )}
+          <section className="interview-content">
+            <div className="question-column">
+              <div className="content-label"><span className="ai-spark">✦</span> AI INTERVIEWER</div>
+              <div className="question-card">
+                <div className="question-number">{String(currentQuestion + 1).padStart(2, "0")}</div>
+                <div>
+                  <span>Current question</span>
+                  <h2>{questionText}</h2>
+                  <p>Listen carefully, then answer in your own words. You may type or use voice input.</p>
+                </div>
               </div>
-
-              <div className="interview-question-timer">
-                ⏳ {questionTimeLeft}s / question
-              </div>
-
-              <div className="interview-progress">
-                Question{" "}
-                {Math.min(currentQuestion + 1, 20)}{" "}
-                / 20
-              </div>
-
-            </div>
-          </div>
-
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{
-                width: `${progress}%`,
-              }}
-            />
-          </div>
-
-          <div className="camera-section">
-
-            <div className="camera-header">
-              <span className="camera-status">
-                {cameraOn
-                  ? "● CAMERA LIVE"
-                  : "● CAMERA OFF"}
-              </span>
             </div>
 
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="camera-preview"
-            />
-
-            <div className="camera-controls">
-
-              {!cameraOn ? (
-                <button
-                  type="button"
-                  className="primary-button"
-                  onClick={startCamera}
-                  disabled={loading}
-                >
-                  START CAMERA
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={stopCamera}
-                >
-                  STOP CAMERA
-                </button>
-              )}
-
-            </div>
-
-          </div>
-
-          <div className="question-box">
-
-            <span className="question-label">
-              AI QUESTION
-            </span>
-
-            <h2>
-              {questionText}
-            </h2>
-
-          </div>
-
-          <form onSubmit={submitAnswer}>
-
-            <div className="answer-section">
-
-              <label htmlFor="answer-input">
-                YOUR ANSWER
-              </label>
-
+            <form onSubmit={submitAnswer} className="answer-column">
+              <div className="content-label">YOUR ANSWER</div>
+              <div className="answer-note">Speak or Type the Answer</div>
               <textarea
                 id="answer-input"
                 value={answer}
-                onChange={(event) => {
-                  setAnswer(
-                    event.target.value
-                  );
-
-                  answerRef.current =
-                    event.target.value;
-                }}
+                onChange={(event) => { setAnswer(event.target.value); answerRef.current = event.target.value; }}
                 placeholder="Type your answer here..."
-                rows="7"
+                rows="10"
                 disabled={loading}
               />
-
-            </div>
-
-            <div className="voice-answer-controls">
-
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={handleVoiceAnswer}
-                disabled={
-                  loading ||
-                  isListening ||
-                  interviewCompleted
-                }
-              >
-                {isListening
-                  ? "🎙 LISTENING..."
-                  : "🎙 ANSWER BY VOICE"}
-              </button>
-
-              {isListening && (
-                <button
-                  type="button"
-                  className="text-button"
-                  onClick={() => {
-                    suppressRecognitionAutoSubmitRef.current =
-                      true;
-
-                    clearSpeechTimeouts();
-
-                    recognitionSessionIdRef.current +=
-                      1;
-
-                    if (
-                      recognitionRef.current
-                    ) {
-                      try {
-                        recognitionRef.current.stop();
-                      } catch {
-                        // Already stopped.
-                      }
-
-                      recognitionRef.current =
-                        null;
-                    }
-
-                    setIsListening(false);
-
-                    if (
-                      answerRef.current.trim()
-                    ) {
-                      setMessage(
-                        "Voice input stopped. Review your answer and submit when ready."
-                      );
-                    } else {
-                      setMessage(
-                        "Voice input stopped."
-                      );
-                    }
-                  }}
-                >
-                  Stop Listening
+              <div className="answer-toolbar">
+                <button type="button" className="voice-button" onClick={handleVoiceAnswer} disabled={loading || isListening || interviewCompleted}>
+                  {isListening ? "🎙 Listening..." : "🎙 Answer by Voice"}
                 </button>
-              )}
+                {isListening && (
+                  <button type="button" className="text-button" onClick={() => {
+                    suppressRecognitionAutoSubmitRef.current = true;
+                    clearSpeechTimeouts();
+                    recognitionSessionIdRef.current += 1;
+                    if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch { /* stopped */ } recognitionRef.current = null; }
+                    setIsListening(false);
+                    setMessage(answerRef.current.trim() ? "Voice input stopped. Review your answer before submitting." : "Voice input stopped.");
+                  }}>Stop listening</button>
+                )}
+                {!speechSupported && <span className="browser-note">Voice input is not supported in this browser.</span>}
+              </div>
+              <button className="submit-answer-button" type="submit" disabled={loading || !answer.trim() || interviewCompleted}>
+                {loading ? "Submitting..." : currentQuestion === 19 ? "Submit Final Answer →" : "Submit Answer →"}
+              </button>
+              <div className="answer-note">Your response is securely evaluated and stored with this interview session.</div>
+            </form>
+          </section>
 
-              {!speechSupported && (
-                <span className="voice-not-supported">
-                  Voice input is not
-                  supported in this
-                  browser.
-                </span>
-              )}
-
-            </div>
-
-            <button
-              className="primary-button"
-              type="submit"
-              disabled={
-                loading ||
-                !answer.trim() ||
-                interviewCompleted
-              }
-            >
-              {loading
-                ? "SUBMITTING..."
-                : currentQuestion === 19
-                ? "SUBMIT FINAL ANSWER"
-                : "SUBMIT ANSWER →"}
-            </button>
-
-          </form>
-
-          {message && (
-            <div className="message-box">
-              {message}
-            </div>
-          )}
-
-        </div>
+          {message && <div className="inline-message interview-message">{message}</div>}
+        </section>
       </main>
     );
   };
@@ -3546,155 +2599,602 @@ function App() {
      RESULTS PAGE
   ======================================================= */
 
-  const renderResults = () => {
-    return (
-      <main className="page-container">
+ const renderResults = () => {
+  const score = performance.average;
+  const answered = results.length;
 
-        <div className="results-card">
+  const earned = results.reduce(
+    (sum, item) =>
+      sum + Number(item?.score || 0),
+    0
+  );
 
-          <div className="results-header">
+  const zeroScores = results.filter(
+    (item) =>
+      Number(item?.score || 0) === 0
+  ).length;
 
-            <div>
-              <span className="eyebrow">
-                PERFORMANCE ANALYSIS
+  const resultSlots = Array.from(
+    { length: 20 },
+    (_, index) => results[index] || null
+  );
+
+  const selectedItem =
+    resultSlots[selectedResult];
+
+  return (
+    <main className="workspace-page results-page">
+      <style>{`
+        /* Results page: everything fits in one viewport. */
+        .results-page {
+          height: calc(100vh - 72px) !important;
+          max-height: calc(100vh - 72px) !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 12px !important;
+          padding: 18px 28px !important;
+        }
+
+        .results-page .page-heading {
+          flex: 0 0 auto !important;
+          margin: 0 !important;
+        }
+
+        .results-page .page-heading h1 {
+          margin: 2px 0 4px !important;
+          font-size: 28px !important;
+        }
+
+        .results-page .page-heading p {
+          margin: 0 !important;
+        }
+
+        .results-page .results-stat-grid {
+          flex: 0 0 auto !important;
+          grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+          gap: 10px !important;
+          margin: 0 !important;
+        }
+
+        .results-page .result-stat {
+          min-height: 0 !important;
+          padding: 12px 14px !important;
+        }
+
+        .results-page .result-stat strong {
+          font-size: 24px !important;
+        }
+
+        .results-page .question-review-layout {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+          display: grid !important;
+          grid-template-columns: minmax(300px, 0.9fr) minmax(420px, 1.5fr) !important;
+          gap: 14px !important;
+          align-items: stretch !important;
+        }
+
+        .results-page .question-selector-panel,
+        .results-page .selected-result-panel {
+          grid-column: auto !important;
+          min-width: 0 !important;
+          min-height: 0 !important;
+          width: auto !important;
+          position: relative !important;
+          z-index: 1 !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+          padding: 14px !important;
+        }
+
+        .results-page .question-selector-panel {
+          display: flex !important;
+          flex-direction: column !important;
+        }
+
+        .results-page .question-selector-panel .panel-heading {
+          flex: 0 0 auto !important;
+          margin-bottom: 10px !important;
+        }
+
+        .results-page .question-selector-panel .panel-heading h2 {
+          margin: 2px 0 0 !important;
+          font-size: 18px !important;
+        }
+
+        .results-page .question-box-grid {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          display: grid !important;
+          grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+          grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+          gap: 8px !important;
+        }
+
+        .results-page .question-result-box {
+          min-width: 0 !important;
+          min-height: 0 !important;
+          padding: 8px 5px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 2px !important;
+        }
+
+        .results-page .question-result-box span {
+          font-size: 12px !important;
+        }
+
+        .results-page .question-result-box strong {
+          font-size: 13px !important;
+        }
+
+        .results-page .question-box-legend {
+          flex: 0 0 auto !important;
+          margin-top: 8px !important;
+          gap: 10px !important;
+          font-size: 11px !important;
+        }
+
+        .results-page .selected-result-panel {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 8px !important;
+        }
+
+        .results-page .selected-result-header {
+          flex: 0 0 auto !important;
+          min-height: 0 !important;
+          gap: 10px !important;
+        }
+
+        .results-page .selected-result-header h2 {
+          margin: 2px 0 0 !important;
+          font-size: 17px !important;
+          line-height: 1.25 !important;
+          display: -webkit-box !important;
+          -webkit-line-clamp: 2 !important;
+          -webkit-box-orient: vertical !important;
+          overflow: hidden !important;
+        }
+
+        .results-page .selected-score {
+          flex: 0 0 auto !important;
+          font-size: 18px !important;
+          padding: 8px 10px !important;
+        }
+
+        .results-page .selected-answer-section,
+        .results-page .selected-feedback-section,
+        .results-page .feedback-item {
+          margin: 0 !important;
+          padding: 8px 10px !important;
+        }
+
+        /* Keep both answer and feedback visible in the results card. */
+        .results-page .selected-answer-section,
+        .results-page .selected-feedback-section {
+          flex: 1 1 0% !important;
+          min-height: 0 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          overflow: hidden !important;
+        }
+
+        .results-page .selected-answer-section p,
+        .results-page .selected-feedback-section p,
+        .results-page .feedback-item p {
+          margin: 3px 0 0 !important;
+          line-height: 1.35 !important;
+          display: -webkit-box !important;
+          -webkit-box-orient: vertical !important;
+          overflow: hidden !important;
+        }
+
+        /* Let the answer and AI feedback scroll independently instead of truncating. */
+        .results-page .selected-answer-section p,
+        .results-page .selected-feedback-section p {
+          display: block !important;
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          -webkit-line-clamp: unset !important;
+          line-clamp: unset !important;
+          -webkit-box-orient: initial !important;
+          height: auto !important;
+          max-height: none !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          text-overflow: clip !important;
+          white-space: pre-wrap !important;
+          overflow-wrap: anywhere !important;
+          word-break: normal !important;
+          padding-right: 7px !important;
+          scrollbar-width: thin;
+          scrollbar-color: #b8b5d8 transparent;
+        }
+
+        .results-page .selected-answer-section p::-webkit-scrollbar,
+        .results-page .selected-feedback-section p::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .results-page .selected-answer-section p::-webkit-scrollbar-thumb,
+        .results-page .selected-feedback-section p::-webkit-scrollbar-thumb {
+          background: #b8b5d8;
+          border-radius: 6px;
+        }
+
+        .results-page .selected-answer-section p::-webkit-scrollbar-track,
+        .results-page .selected-feedback-section p::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .results-page .feedback-item p {
+          -webkit-line-clamp: 2 !important;
+        }
+
+        .results-page .inline-message {
+          flex: 0 0 auto !important;
+          margin: 0 !important;
+        }
+
+        @media (max-width: 900px) {
+          .results-page {
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+          }
+
+          .results-page .question-review-layout {
+            grid-template-columns: 1fr !important;
+            overflow: visible !important;
+          }
+        }
+      `}</style>
+      <section className="page-heading">
+        <div>
+          <span className="section-kicker">
+            PERFORMANCE ANALYSIS
+          </span>
+
+          <h1>Interview Results</h1>
+
+          <p>
+            Select any question to view your answer,
+            score and personalized AI feedback.
+          </p>
+        </div>
+
+        {candidateId && (
+          <div className="candidate-badge">
+            Candidate #{candidateId}
+          </div>
+        )}
+      </section>
+
+      <section className="results-stat-grid compact-results-stats">
+        <article className="result-stat main-score">
+          <span>OVERALL SCORE</span>
+          <strong>{score}%</strong>
+          <small>
+            {performance.title} performance
+          </small>
+        </article>
+
+        <article className="result-stat">
+          <span>QUESTIONS ANSWERED</span>
+          <strong>
+            {answered}
+            <small> / 20</small>
+          </strong>
+          <small>
+            Completed in this session
+          </small>
+        </article>
+
+        <article className="result-stat">
+          <span>AVERAGE ANSWER</span>
+          <strong>
+            {answered
+              ? (earned / answered).toFixed(1)
+              : "0.0"}
+            <small> / 10</small>
+          </strong>
+          <small>
+            Across evaluated answers
+          </small>
+        </article>
+
+        <article className="result-stat alert-stat">
+          <span>ZERO SCORES</span>
+          <strong>{zeroScores}</strong>
+          <small>
+            Incorrect or unanswered
+          </small>
+        </article>
+      </section>
+
+      {results.length > 0 ? (
+        <section className="question-review-layout">
+
+          {/* =================================================
+              20 QUESTION BOXES
+          ================================================= */}
+
+          <article className="dashboard-card question-selector-panel">
+            <div className="panel-heading">
+              <div>
+                <span className="section-kicker">
+                  QUESTION REVIEW
+                </span>
+
+                <h2>
+                  All 20 Questions
+                </h2>
+              </div>
+            </div>
+
+            <div className="question-box-grid">
+              {resultSlots.map(
+                (result, index) => {
+                  const itemScore = result
+                    ? Number(
+                        result.score || 0
+                      )
+                    : null;
+
+                  const isSelected =
+                    selectedResult === index;
+
+                  return (
+                    <button
+                      type="button"
+                      key={index}
+                      className={
+                        `question-result-box ${
+                          isSelected
+                            ? "selected"
+                            : ""
+                        } ${
+                          result
+                            ? itemScore === 0
+                              ? "zero"
+                              : itemScore >= 7
+                              ? "good"
+                              : "mid"
+                            : "unanswered"
+                        }`
+                      }
+                      onClick={() =>
+                        setSelectedResult(
+                          index
+                        )
+                      }
+                    >
+                      <span>
+                        Q{index + 1}
+                      </span>
+
+                      <strong>
+                        {result
+                          ? `${itemScore}/10`
+                          : "--"}
+                      </strong>
+                    </button>
+                  );
+                }
+              )}
+            </div>
+
+            <div className="question-box-legend">
+              <span>
+                <i className="good" />
+                Good
               </span>
 
-              <h1>
-                Interview Results
-              </h1>
+              <span>
+                <i className="mid" />
+                Needs Improvement
+              </span>
+
+              <span>
+                <i className="zero" />
+                Incorrect
+              </span>
             </div>
+          </article>
 
-            {candidateId && (
-              <div className="candidate-pill">
-                Candidate #{candidateId}
-              </div>
-            )}
+          {/* =================================================
+              SELECTED QUESTION DETAILS
+          ================================================= */}
 
-          </div>
+          <article className="dashboard-card selected-result-panel">
+            {selectedItem ? (
+              <>
+                <div className="selected-result-header">
+                  <div>
+                    <span className="section-kicker">
+                      QUESTION{" "}
+                      {selectedResult + 1}
+                    </span>
 
-          {results.length > 0 ? (
-            <>
+                    <h2>
+                      {selectedItem.question ||
+                        selectedItem.question_text ||
+                        "Interview Question"}
+                    </h2>
+                  </div>
 
-              <div className="performance-overview">
-
-                <div className="score-circle">
-
-                  <strong>
-                    {performance.average}
-                  </strong>
-
-                  <span>
-                    / 100
-                  </span>
-
+                  <div
+                    className={
+                      `selected-score ${
+                        Number(
+                          selectedItem.score || 0
+                        ) >= 7
+                          ? "good"
+                          : Number(
+                              selectedItem.score ||
+                                0
+                            ) === 0
+                          ? "zero"
+                          : "mid"
+                      }`
+                    }
+                  >
+                    {Number(
+                      selectedItem.score || 0
+                    )}
+                    /10
+                  </div>
                 </div>
 
-                <div>
-
-                  <span className="eyebrow">
-                    OVERALL PERFORMANCE
+                <div className="selected-answer-section">
+                  <span>
+                    YOUR ANSWER
                   </span>
-
-                  <h2>
-                    {performance.title}
-                  </h2>
 
                   <p>
-                    Your average interview
-                    performance based on
-                    the available evaluation
-                    results.
+                    {selectedItem.answer ||
+                      "No answer recorded."}
                   </p>
-
                 </div>
 
-              </div>
+                <div className="selected-feedback-section">
+                  <span>
+                    AI FEEDBACK
+                  </span>
 
-              <div className="results-list">
+                  <p>
+                    {selectedItem.feedback ||
+                      "No detailed feedback was returned for this answer."}
+                  </p>
+                </div>
 
-                {results.map(
-                  (result, index) => (
-                    <div
-                      className="result-item"
-                      key={index}
-                    >
+                {selectedItem.strengths && (
+                  <div className="feedback-item">
+                    <strong>
+                      Strengths
+                    </strong>
 
-                      <div className="result-question">
-
-                        <span>
-                          QUESTION{" "}
-                          {index + 1}
-                        </span>
-
-                        <p>
-                          {result.question ||
-                            result.question_text ||
-                            "Interview question"}
-                        </p>
-
-                      </div>
-
-                      <div className="result-score">
-
-                        <strong>
-                          {result.score ??
-                            "--"}
-                        </strong>
-
-                        <span>
-                          / 10
-                        </span>
-
-                      </div>
-
-                    </div>
-                  )
+                    <p>
+                      {Array.isArray(
+                        selectedItem.strengths
+                      )
+                        ? selectedItem.strengths.join(
+                            " • "
+                          )
+                        : selectedItem.strengths}
+                    </p>
+                  </div>
                 )}
 
+                {selectedItem.weaknesses && (
+                  <div className="feedback-item">
+                    <strong>
+                      Weaknesses / Mistakes
+                    </strong>
+
+                    <p>
+                      {Array.isArray(
+                        selectedItem.weaknesses
+                      )
+                        ? selectedItem.weaknesses.join(
+                            " • "
+                          )
+                        : selectedItem.weaknesses}
+                    </p>
+                  </div>
+                )}
+
+                {selectedItem.improvement && (
+                  <div className="feedback-item">
+                    <strong>
+                      How to Improve
+                    </strong>
+
+                    <p>
+                      {selectedItem.improvement}
+                    </p>
+                  </div>
+                )}
+
+                {selectedItem.ideal_answer && (
+                  <div className="feedback-item">
+                    <strong>
+                      Ideal Answer
+                    </strong>
+
+                    <p>
+                      {selectedItem.ideal_answer}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="selected-empty">
+                <div className="empty-icon">
+                  ✦
+                </div>
+
+                <h2>
+                  Question not answered
+                </h2>
+
+                <p>
+                  This question was not answered
+                  during the interview.
+                </p>
               </div>
+            )}
+          </article>
+        </section>
+      ) : (
+        <section className="empty-results">
+          <div className="empty-icon">
+            ✦
+          </div>
 
-            </>
-          ) : (
-            <div className="empty-results">
+          <span className="section-kicker">
+            NO RESULTS YET
+          </span>
 
-              <div className="empty-icon">
-                ◈
-              </div>
+          <h2>
+            Complete an AI interview to see
+            your results
+          </h2>
 
-              <h2>
-                No Interview Results Yet
-              </h2>
+          <p>
+            Your scores and question-level
+            evaluation will appear here after
+            the interview.
+          </p>
 
-              <p>
-                Complete an AI interview
-                to see your scores and
-                feedback here.
-              </p>
+          <button
+            type="button"
+            className="primary-button"
+            onClick={startInterview}
+            disabled={loading}
+          >
+            {loading
+              ? "Initializing..."
+              : "Start Interview →"}
+          </button>
+        </section>
+      )}
 
-              <button
-                type="button"
-                className="primary-button small-button"
-                onClick={
-                  startInterview
-                }
-                disabled={loading}
-              >
-                START INTERVIEW
-              </button>
-
-            </div>
-          )}
-
-          {message && (
-            <div className="message-box">
-              {message}
-            </div>
-          )}
-
+      {message && (
+        <div className="inline-message">
+          {message}
         </div>
-      </main>
-    );
-  };
+      )}
+    </main>
+  );
+};
 
   /* =======================================================
      AUTH GUARD
@@ -3717,53 +3217,44 @@ function App() {
   ======================================================= */
 
   return (
-    <div className="app">
+    <div className="app authenticated-app">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-symbol">✦</div>
+          <div><strong>INTERVIA</strong><span>Intelligent Assessment</span></div>
+        </div>
 
-      <Navbar
-        onNavigate={
-          handleNavigate
-        }
-      />
+        <nav className="sidebar-nav" aria-label="Main navigation">
+          <button className={page === "home" ? "nav-item active" : "nav-item"} onClick={() => handleNavigate("home")} type="button"><span>⌂</span>Dashboard</button>
+          <button className={page === "interview" ? "nav-item active" : "nav-item"} onClick={() => handleNavigate("interview")} type="button"><span>▣</span>Interview</button>
+          <button className={page === "results" ? "nav-item active" : "nav-item"} onClick={() => handleNavigate("results")} type="button"><span>◫</span>Results</button>
+        </nav>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent:
-            "flex-end",
-          alignItems: "center",
-          gap: "12px",
-          padding: "12px 24px",
-        }}
-      >
+        <div className="sidebar-info">
+          <span className="section-kicker">INTERVIA FEATURES</span>
+          <p>Resume-aware questions, adaptive evaluation and voice input.</p>
+        </div>
 
-        <span>
-          Welcome{" "}
-          <strong>
-            {authUser?.name ||
-              name ||
-              "Candidate"}
-          </strong>
-        </span>
+        <div className="sidebar-user">
+          <div className="avatar">{(authUser?.name || name || "C").charAt(0).toUpperCase()}</div>
+          <div><strong>{authUser?.name || name || "Candidate"}</strong><span>{candidateType === "technical" ? "Technical" : "Non-Technical"}</span></div>
+          <button type="button" onClick={handleLogout} aria-label="Log out">↪</button>
+        </div>
+      </aside>
 
-        <button
-          type="button"
-          className="danger-button"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+      <div className="main-shell">
+        <header className="topbar">
+          <div className="mobile-brand"><div className="brand-symbol">✦</div><strong>INTERVIA</strong></div>
+          <div className="topbar-right">
+            <span>Welcome, {authUser?.name || name || "Candidate"}</span>
+            <button type="button" className="logout-button" onClick={handleLogout}>Logout</button>
+          </div>
+        </header>
 
+        {page === "home" && renderHome()}
+        {page === "interview" && renderInterview()}
+        {page === "results" && renderResults()}
       </div>
-
-      {page === "home" &&
-        renderHome()}
-
-      {page === "interview" &&
-        renderInterview()}
-
-      {page === "results" &&
-        renderResults()}
-
     </div>
   );
 }

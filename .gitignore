@@ -46,3 +46,23 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+# Local database backups and SQLite temporary files
+*.db-*
+*.backup
+*.bak
+
+# Uploaded resumes and user files
+backend/uploads/
+
+# Load testing output and generated reports
+reports/
+loadtest/__pycache__/
+*.pyc
+
+# Temporary debugging and patch files
+backend_diff.txt
+interview_current.txt
+interview_current_full.txt
+connection_sqlite_concurrency_fix.py
+patch_*.py
+run_35_user_test.ps1

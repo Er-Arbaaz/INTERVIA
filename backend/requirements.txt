@@ -1,5 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
-openai
+SQLAlchemy
+google-genai
 python-dotenv
+python-multipart
+pypdf
+python-docx
+psycopg[binary]>=3.2,<4
