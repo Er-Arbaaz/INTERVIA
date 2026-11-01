@@ -66,3 +66,6 @@ interview_current_full.txt
 connection_sqlite_concurrency_fix.py
 patch_*.py
 run_35_user_test.ps1
+# SQLite backup temporary files
+*-wal
+*-shm

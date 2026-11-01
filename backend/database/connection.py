@@ -1,21 +1,48 @@
-"""SQLAlchemy database configuration for INTERVIA's SQLite development database.
 
-This configuration gives SQLite more time to wait for a concurrent writer and
-uses WAL mode to reduce reader/writer blocking. SQLite still permits only one
-writer at a time; use PostgreSQL for a production deployment with concurrent
-interview sessions.
-"""
+"""SQLAlchemy database configuration for INTERVIA."""
 
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, event
+from sqlalchemy.engine import URL
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./interview.db")
+# Load backend/.env before reading any database settings.
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+load_dotenv(BACKEND_DIR / ".env")
 
-if DATABASE_URL.startswith("sqlite"):
+# Prefer an explicitly configured DATABASE_URL.
+# Otherwise, use Supabase when its password is configured.
+database_url = os.getenv("DATABASE_URL")
+
+if not database_url and os.getenv("SUPABASE_DB_PASSWORD"):
+    database_url = URL.create(
+        drivername="postgresql+psycopg",
+        username=os.getenv(
+            "SUPABASE_DB_USER",
+            "postgres.hezlegoywjnmlkuqkmgm",
+        ),
+        password=os.environ["SUPABASE_DB_PASSWORD"],
+        host=os.getenv(
+            "SUPABASE_DB_HOST",
+            "aws-0-ap-south-1.pooler.supabase.com",
+        ),
+        port=int(os.getenv("SUPABASE_DB_PORT", "5432")),
+        database=os.getenv("SUPABASE_DB_NAME", "postgres"),
+        query={"sslmode": "require"},
+    )
+
+# Keep SQLite as the local fallback until Supabase credentials are configured.
+if not database_url:
+    database_url = "sqlite:///./interview.db"
+
+is_sqlite = str(database_url).startswith("sqlite")
+
+if is_sqlite:
     engine = create_engine(
-        DATABASE_URL,
+        database_url,
         connect_args={
             "check_same_thread": False,
             "timeout": 30,
@@ -25,7 +52,6 @@ if DATABASE_URL.startswith("sqlite"):
 
     @event.listens_for(engine, "connect")
     def _configure_sqlite_connection(dbapi_connection, connection_record):
-        """Apply safe, per-connection SQLite settings."""
         cursor = dbapi_connection.cursor()
         try:
             cursor.execute("PRAGMA busy_timeout=30000")
@@ -33,13 +59,13 @@ if DATABASE_URL.startswith("sqlite"):
         finally:
             cursor.close()
 
-    # WAL mode is persistent for the database. Set it once as the app imports,
-    # before FastAPI begins serving requests. Back up the database first.
     with engine.connect() as connection:
         connection.exec_driver_sql("PRAGMA journal_mode=WAL")
 else:
-    # Allows DATABASE_URL to point to PostgreSQL (or another SQLAlchemy DB).
-    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+    engine = create_engine(
+        database_url,
+        pool_pre_ping=True,
+    )
 
 SessionLocal = sessionmaker(
     autocommit=False,
