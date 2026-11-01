@@ -8,3 +8,5 @@ python-multipart
 pypdf
 python-docx
 psycopg[binary]>=3.2,<4
+
+email-validator
