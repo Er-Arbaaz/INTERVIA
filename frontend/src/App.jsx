@@ -1726,7 +1726,13 @@ if (recognitionRef.current) {
   const startInterview = async () => {
     setMessage("");
 
-    if (!candidateId) {
+    const activeCandidateId =
+      candidateId ||
+      (authUser?.id
+        ? localStorage.getItem(`candidateId_${authUser.id}`)
+        : "");
+
+    if (!activeCandidateId) {
       setMessage(
         "Please initialize your candidate profile first."
       );
@@ -1777,13 +1783,12 @@ if (recognitionRef.current) {
 
       const response =
         await axios.get(
-          `${API}/interview/start-candidate/${candidateId}`,
-          {
-            params: {
-              candidate_id:
-                candidateId,
-            },
-          }
+          `${API}/interview/start-candidate/${activeCandidateId}`,
+{
+  params: {
+    candidate_id: activeCandidateId,
+  },
+}
         );
 
       console.log(
@@ -2438,7 +2443,7 @@ if (recognitionRef.current) {
               type="button"
               className="primary-button large-button"
               onClick={startInterview}
-              disabled={loading || !candidateId || !skill}
+              disabled={loading}
             >
               {loading ? "Initializing AI..." : "Start Interview →"}
             </button>
