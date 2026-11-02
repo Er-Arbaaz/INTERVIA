@@ -1206,11 +1206,6 @@ def start_interview(
         "questions": generated_questions
 
     }
-
-
-
-
-
 # ============================================================
 
 # SUBMIT ANSWER
@@ -1243,8 +1238,6 @@ def submit_answer(
 
     # --------------------------------------------------------
 
-
-
     if not question or not question.strip():
 
         raise HTTPException(
@@ -1258,17 +1251,11 @@ def submit_answer(
 
 
     cleaned_question = question.strip()
-
-
-
     # --------------------------------------------------------
 
     # Verify session
 
     # --------------------------------------------------------
-
-
-
     session = (
 
         db.query(InterviewSession)
@@ -1296,17 +1283,11 @@ def submit_answer(
             detail="Interview session not found."
 
         )
-
-
-
     # --------------------------------------------------------
 
     # Prevent answers after completion
 
     # --------------------------------------------------------
-
-
-
     if session.status == "completed":
 
         raise HTTPException(
@@ -1332,73 +1313,39 @@ def submit_answer(
 
 
     current_time = datetime.utcnow()
-
-
-
     # --------------------------------------------------------
-
     # OVERALL 15-MINUTE INTERVIEW TIMER
-
     # --------------------------------------------------------
 
-
+    overall_elapsed_seconds = 0
 
     if session.created_at:
-
         overall_elapsed_seconds = (
-
             current_time - session.created_at
-
         ).total_seconds()
 
+    overall_time_expired = (
+        overall_elapsed_seconds >= TOTAL_INTERVIEW_TIME_SECONDS
+    )
 
+    if overall_time_expired and not timed_out:
+        session.status = "timed_out"
+        session.question_started_at = None
+        db.commit()
 
-        if overall_elapsed_seconds > TOTAL_INTERVIEW_TIME_SECONDS:
-
-            session.status = "timed_out"
-
-            session.question_started_at = None
-
-            db.commit()
-
-
-
-            raise HTTPException(
-
-                status_code=408,
-
-                detail={
-
-                    "message": "The overall 15-minute interview time has expired.",
-
-                    "total_time_limit_seconds": TOTAL_INTERVIEW_TIME_SECONDS,
-
-                    "elapsed_seconds": round(overall_elapsed_seconds, 1),
-
-                    "session_status": "timed_out"
-
-                }
-
-            )
-
-    else:
-
-        overall_elapsed_seconds = 0
-
-
-
+        raise HTTPException(
+            status_code=408,
+            detail={
+                "message": "The overall 15-minute interview time has expired.",
+                "total_time_limit_seconds": TOTAL_INTERVIEW_TIME_SECONDS,
+                "elapsed_seconds": round(overall_elapsed_seconds, 1),
+                "session_status": "timed_out"
+            }
+        )
     # --------------------------------------------------------
-
     # Validate answer
-
     # --------------------------------------------------------
-
-
-
     cleaned_answer = (answer or "").strip()
-
-
-
     # A timeout is a valid question outcome. It is recorded as a
 
     # zero-score answer so the interview can continue to Q20.
@@ -1434,17 +1381,11 @@ def submit_answer(
             detail="Answer is too short. Please provide a meaningful answer."
 
         )
-
-
-
     # --------------------------------------------------------
 
     # Count existing answers
 
     # --------------------------------------------------------
-
-
-
     answer_count = (
 
         db.query(Interview)
@@ -1460,17 +1401,11 @@ def submit_answer(
         .count()
 
     )
-
-
-
     # --------------------------------------------------------
 
     # Prevent submitting more answers than questions
 
     # --------------------------------------------------------
-
-
-
     if answer_count >= session.total_questions:
 
         session.status = "completed"
@@ -1488,17 +1423,11 @@ def submit_answer(
             detail="All questions in this interview have already been answered."
 
         )
-
-
-
     # --------------------------------------------------------
 
     # Prevent duplicate question submission
 
     # --------------------------------------------------------
-
-
-
     existing_answer = (
 
         db.query(Interview)
@@ -1528,9 +1457,6 @@ def submit_answer(
             detail="This question has already been answered."
 
         )
-
-
-
     # ========================================================
 
     # QUESTION RESPONSE TIME TRACKING
@@ -1952,76 +1878,41 @@ def submit_answer(
             session.suspicious_submission_count + 1
 
         )
-
-
-
     # --------------------------------------------------------
 
     # Update question index
 
     # --------------------------------------------------------
-
-
-
     session.current_question_index = new_answer_count
-
-
-
     # --------------------------------------------------------
 
     # Automatically complete after Q20
 
-    # --------------------------------------------------------
-
-
-
-    if new_answer_count >= TOTAL_QUESTIONS:
-
+        # --------------------------------------------------------
+    if (
+    new_answer_count >= TOTAL_QUESTIONS
+    or timed_out
+):
         session.status = "completed"
-
         session.question_started_at = None
-
         next_question = None
-
-
-
     else:
-
         # Start response-time tracking for the next question.
-
         session.question_started_at = current_time
 
-
-
     db.commit()
-
     db.refresh(interview)
 
-
-
     # ========================================================
-
     # RESPONSE
-
     # ========================================================
-
-
-
     remaining_overall_seconds = max(
-
         0,
-
         int(
-
             TOTAL_INTERVIEW_TIME_SECONDS
-
             - overall_elapsed_seconds
-
         )
-
     )
-
-
 
     return {
 

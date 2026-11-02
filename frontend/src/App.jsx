@@ -2014,15 +2014,12 @@ if (recognitionRef.current) {
           null,
           {
             params: {
-              question:
-                currentQuestionText,
-              answer:
-                currentAnswer,
-              candidate_id:
-                candidateId,
-              session_id:
-                sessionId,
-            },
+  question: currentQuestionText,
+  answer: currentAnswer,
+  candidate_id: candidateId,
+  session_id: sessionId,
+  timed_out: timedOut,
+},
           }
         );
 
