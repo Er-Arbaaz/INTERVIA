@@ -26,15 +26,15 @@ def _get_gemini_client(api_key, genai, types):
     global _GEMINI_CLIENT, _GEMINI_CLIENT_SIGNATURE
 
     try:
-        timeout_ms = int(os.getenv("GEMINI_HTTP_TIMEOUT_MS", "25000"))
+        timeout_ms = int(os.getenv("GEMINI_HTTP_TIMEOUT_MS", "8000"))
     except (TypeError, ValueError):
-        timeout_ms = 25000
+        timeout_ms = 8000
     timeout_ms = max(1000, min(timeout_ms, 120000))
 
     try:
-        retry_attempts = int(os.getenv("GEMINI_HTTP_RETRY_ATTEMPTS", "2"))
+       retry_attempts = int(os.getenv("GEMINI_HTTP_RETRY_ATTEMPTS", "1"))
     except (TypeError, ValueError):
-        retry_attempts = 2
+        retry_attempts = 1
     retry_attempts = max(1, min(retry_attempts, 3))
 
     signature = (hashlib.sha256(api_key.encode("utf-8")).hexdigest(), timeout_ms, retry_attempts)
